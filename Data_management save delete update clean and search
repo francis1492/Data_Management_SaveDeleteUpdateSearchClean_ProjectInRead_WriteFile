@@ -1,0 +1,341 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+using System.Windows.Forms;
+
+namespace DataManagement
+{
+    public partial class Form1 : Form
+    {
+        static List<Data> ob = new List<Data>();
+        public Form1()
+        {
+            InitializeComponent();
+            FileToListExport();
+        }
+        string selectedItem;
+        public void Saving()
+        {
+            ob.Add(new Data(Fname.Text, int.Parse(Age.Text), GenderB.Text, Adress.Text, PNumber.Text, DateTime.Parse(dateTimePicker1.Text)));
+
+        }
+        public void Display()
+        {
+           
+            FileToListExport();
+            listView1.Items.Clear();
+            foreach (var info in ob)
+            {
+                if (info != null)
+                {
+                    listView1.Items.Add(info.Name);
+
+                }
+            }
+        }
+        public void Delete()
+        {
+            for (int i = 0; i < ob.Count; i++)
+            {
+                if (ob[i] != null)
+                {
+
+                    if (ob[i].Name == selectedItem || ob[i].Name == txtSearch.Text)
+                    {
+                        ob[i] = null;
+                        MessageBox.Show("Data Successfully deleted");
+                        break;
+                    }
+
+                }
+            }
+        }
+        public void Update()
+        {
+            for (int i = 0; i < ob.Count; i++)
+            {
+                if (ob[i] != null)
+                {
+                    if (ob[i].Name == txtSearch.Text || ob[i].Name == selectedItem)
+                    {
+                        Fname.Text = ob[i].Name;
+                        Age.Text = ob[i].Age.ToString();
+                        PNumber.Text = ob[i].PNumber;
+                        GenderB.Text = ob[i].Gender;
+                        Adress.Text = ob[i].Adress;
+                        PNumber.Text = ob[i].PNumber;
+                        dateTimePicker1.Text = ob[i].DTime.ToString();
+
+                        button1.Text = "Update";
+                        break;
+                    }
+                }
+            }
+        }
+        public void Search()
+        {
+
+            for (int i = 0; i < ob.Count; i++)
+            {
+                if (ob[i] != null)
+                {
+                    if (ob[i].Name.Contains(txtSearch.Text))
+                    {
+                        listView1.Items.Clear();
+                        listView1.Items.Add(ob[i].Name);
+                       
+                    }
+                }
+
+  
+            }
+        }
+        public void Clean()
+        {
+            listView1.Items.Clear();
+        }
+        public void DeleteAll()
+        {
+            for (int i = 0; i < ob.Count; i++)
+            {
+                if (ob[i] != null)
+                {
+                    ob[i] = null;
+                    MessageBox.Show("Data Successfully cleaned!");
+                    break;
+                }
+            }
+            ListToFileExpot();
+        }
+        public static void FileToListExport()
+        {
+            ob.Clear();
+            StreamReader Read = new StreamReader("StoreData.txt");
+            string Line;
+            while ((Line = Read.ReadLine()) != null)
+            {
+
+                Data det = new Data(
+                    Line,
+                    int.Parse(Read.ReadLine()),
+                    Read.ReadLine(),
+                    Read.ReadLine(),
+                    Read.ReadLine(),
+                    DateTime.Parse(Read.ReadLine()));
+
+                ob.Add(det);
+            }
+            Line = Read.ReadLine();
+            Read.Close();
+        }
+        public static void ListToFileExpot()
+        {
+            StreamWriter writer = new StreamWriter("StoreData.txt");
+            for (int i = 0; i < ob.Count; i++)
+            {
+                if (ob[i] != null)
+                {
+                    writer.WriteLine(ob[i].Name);
+                    writer.WriteLine(ob[i].Age.ToString());
+                    writer.WriteLine(ob[i].Gender);
+                    writer.WriteLine(ob[i].Adress);
+                    writer.WriteLine(ob[i].PNumber);
+                    writer.WriteLine(ob[i].DTime.ToString());
+                }
+            }
+            writer.Close();
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+            if (button1.Text == "SAVE")
+            {
+                Saving();
+                Fname.Text = "";
+                Age.Text = "";
+                GenderB.Text = "";
+                Adress.Text = "";
+                PNumber.Text = "";
+                dateTimePicker1.Text = "";
+                ListToFileExpot();
+                Display();
+            }
+            else
+            {
+                for (int i = 0; i < ob.Count; i++)
+                {
+                    if (ob[i] != null)
+                    {
+                        if (ob[i].Name == txtSearch.Text || ob[i].Name == selectedItem)
+                        {
+                            ob[i].Name = Fname.Text;
+                            ob[i].Age = int.Parse(Age.Text);
+                            ob[i].Gender = GenderB.Text;
+                            ob[i].Adress = Adress.Text;
+                            ob[i].PNumber = PNumber.Text;
+                            ob[i].DTime = DateTime.Parse(dateTimePicker1.Text);
+                            button1.Text = "SAVE";
+                            MessageBox.Show("Successfully updated");
+
+                            Fname.Text = "";
+                            Age.Text = "";
+                            GenderB.Text = "";
+                            Adress.Text = "";
+                            PNumber.Text = "";
+                            dateTimePicker1.Text = "";
+                            ListToFileExpot();
+                            Display();
+                            break;
+
+                        }
+                    }
+                    }
+                    }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Search();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < ob.Count; i++)
+            {
+                if (ob[i] == null && listView1.Text == "")
+                {
+                    MessageBox.Show("No saved data found"); ;
+                    break;
+                }
+                else
+                {
+
+                    Display();
+                    break;
+                }
+            }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < ob.Count; i++)
+            {
+                if (ob[i] == null)
+                {
+                    MessageBox.Show("No saved data found");
+                    break;
+                }
+                else
+                {
+                    Delete();
+                    ListToFileExpot();
+                    Display();
+                }
+            }
+        }
+
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < ob.Count; i++)
+            {
+                if (listView1.Text == null)
+                {
+                    MessageBox.Show("Data not found!");
+                }
+                else
+                {
+                    Update();
+
+                }
+            }
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            if (listView1.Text == null)
+            {
+                MessageBox.Show("cleaned!");
+            }
+            else
+            {
+                Clean();
+            }
+        }
+
+        private void btnDelAll_Click(object sender, EventArgs e)
+        {
+
+        }
+        string Itemm;
+        private void listView1_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+        {
+            Itemm = e.Item.Text;
+        }
+        string SItem;
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SItem = listView1.SelectedItems.ToString();
+            
+            for (int i = 0; i < ob.Count; i++)
+            {
+                if (ob[i] != null)
+                {
+                    if (ob[i].Name == SItem)
+                    {
+                        lbl1.Text = ob[i].Name;
+                        lbl2.Text = ob[i].Age.ToString();
+                        lbl3.Text = ob[i].Gender;
+                        lbl4.Text = ob[i].Adress;
+                        lbl5.Text = ob[i].PNumber;
+                        lbl6.Text = ob[i].DTime.ToString();
+                        break;
+                    }
+                }
+            }
+        }
+
+    }
+
+}
+-----------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DataManagement
+{
+    internal class Data
+    {
+        public int Id;
+        public string Name;
+        public int Age;
+        public string Gender;
+        public string Adress;
+        public string PNumber;
+        public DateTime DTime;
+
+        public Data(string name, int age, string Gender, string adress, string PhoneNumber, DateTime dTime)
+        {
+            Name = name;
+            Age = age;
+            this.Gender = Gender;
+            Adress = adress;
+            PNumber = PhoneNumber;
+            DTime = dTime;
+
+        }
+
+    }
+
+}
